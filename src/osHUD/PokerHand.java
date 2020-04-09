@@ -1,10 +1,13 @@
 package osHUD;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PokerHand {
-    private Player[] players;
+    private String id;
+    private Map<Integer, String> players = new HashMap<Integer, String>(); 
     private int buttonIndex;
     private double bigBlindAmount;
 
@@ -13,25 +16,48 @@ public class PokerHand {
     private List<PokerAction> turn = new ArrayList<PokerAction>();
     private List<PokerAction> river = new ArrayList<PokerAction>();
 
-    public PokerHand(Player[] players, int buttonIndex, double bigBlindAmount) {
+    public PokerHand(String id, Map<Integer, String> players, int buttonIndex) {
+        this.id = id;
         this.players = players;
         this.buttonIndex = buttonIndex;
-        this.bigBlindAmount = bigBlindAmount;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format(
+                "Hand #%s\nPlayers: %s\nSeat #%d is on the button.\nPreflop:%s\nFlop:%s\nTurn:%s\nRiver:%s"
+                , id, players.toString(), buttonIndex, preflop.toString(), flop.toString(), turn.toString(), river.toString());
     }
 
-    public void addPreflopAction(PokerAction action) {
-        preflop.add(action);
+    public List<PokerAction> getPreflop() {
+        return preflop;
     }
 
-    public void addFlopAction(PokerAction action) {
-        flop.add(action);
+    public void setPreflop(List<PokerAction> preflop) {
+        this.preflop = preflop;
     }
 
-    public void addTurnAction(PokerAction action) {
-        turn.add(action);
+    public List<PokerAction> getFlop() {
+        return flop;
     }
 
-    public void addRiverAction(PokerAction action) {
-        river.add(action);
+    public void setFlop(List<PokerAction> flop) {
+        this.flop = flop;
+    }
+
+    public List<PokerAction> getTurn() {
+        return turn;
+    }
+
+    public void setTurn(List<PokerAction> turn) {
+        this.turn = turn;
+    }
+
+    public List<PokerAction> getRiver() {
+        return river;
+    }
+
+    public void setRiver(List<PokerAction> river) {
+        this.river = river;
     }
 }

@@ -7,12 +7,14 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import osHUD.PokerAction.Type;
+
 public class HandHistoryParser {
 
     /**
      * Parses hand history file into Hand objects
      * @param filepath location for hand history
-     * @return
+     * @return list of pokerHand objects
      */
     public static List<PokerHand> parseFile(String filepath) {
         Scanner fi;
@@ -23,9 +25,9 @@ public class HandHistoryParser {
         try {
             while ( fi.hasNextLine() ) {
                 String s = fi.nextLine();
-                singleHand = s.startsWith("PokerStars Hand") && !s.isBlank()
+                singleHand = s.startsWith("PokerStars Hand")
                         ? s : singleHand + "\n" + s;
-                if(s.startsWith("*** SUMMARY ***")) {
+                if(s.isBlank() && !singleHand.isBlank()) {
                     parseHand(singleHand);
                     singleHand = "";
                 }
@@ -33,6 +35,7 @@ public class HandHistoryParser {
         } finally {
             fi.close();
         }
+        
         return null;
     }
 
@@ -45,42 +48,79 @@ public class HandHistoryParser {
         Map<Integer, String> players = getPlayers(hand);
         int button = getButton(hand);
 
-        System.out.println("Hand #" + handId);
-        System.out.println(players.toString());
-        System.out.printf("Seat #%d is the button\n", button);
-
-        List<PokerAction> preflop = getPokerActions(getStringBetween(hand,"*** HOLE CARDS ***", "*** FLOP ***"));
-        List<PokerAction> flop = getPokerActions(getStringBetween(hand,"*** FLOP ***", "*** TURN ***"));
-        List<PokerAction> turn = getPokerActions(getStringBetween(hand,"*** TURN ***", "*** RIVER ***"));
-        List<PokerAction> river = getPokerActions(getStringBetween(hand,"*** RIVER ***", "*** SHOW DOWN ***"));
+        List<PokerAction> preflop = getPokerActions(
+                getStringBetween(hand,"*** HOLE CARDS ***", "*** FLOP ***", "*** SUMMARY ***"));
+        List<PokerAction> flop = getPokerActions(
+                getStringBetween(hand,"*** FLOP ***", "*** TURN ***", "*** SUMMARY ***"));
+        List<PokerAction> turn = getPokerActions(
+                getStringBetween(hand,"*** TURN ***", "*** RIVER ***", "*** SUMMARY ***"));
+        List<PokerAction> river = getPokerActions(
+                getStringBetween(hand,"*** RIVER ***", "*** SHOW DOWN ***", "*** SUMMARY ***"));
+        
+        PokerHand pokerHand = new PokerHand(handId, players, button);
+        pokerHand.setPreflop(preflop);
+        pokerHand.setFlop(flop);
+        pokerHand.setTurn(turn);
+        pokerHand.setRiver(river);
+        System.out.println(pokerHand.toString());
     }
 
     private static String getStringBetween(String text, String start, String end, String optEnd) {
-        Scanner fi = new Scanner(text);
-        String target = "";
-        try {
-            while ( fi.hasNextLine() ) {
-                String s = fi.nextLine();
-                if(s.startsWith(start)) {
-                    target = "";
-                } else {
-                    if(s.startsWith(end) || s.startsWith(optEnd)) {
-                        return target.trim();
-                    }
-                    target += s + "\n";
-                }
-            }
-        } finally {
-            fi.close();
-        }
+        int start1 = text.indexOf(start);
+        int end1 = text.indexOf(end);
+        int end2 = text.indexOf(optEnd);
+        
+        if(start1 != -1 && end1 != -1)
+            return text.substring(start1 + start.length(), end1);
+        if(start1 != -1 && end2 != -1)
+            return text.substring(start1 + start.length(), end2);
         return "";
     }
 
     private static List<PokerAction> getPokerActions(String handHistory) {
-        System.out.println("===");
-        System.out.println(handHistory);
-        System.out.println("===");
-        return null;
+        List<PokerAction> actions = new ArrayList<PokerAction>();
+        Scanner fi = new Scanner(handHistory);
+        while(fi.hasNextLine()) {
+            String s = fi.nextLine();
+            String[] params = s.split(" ");
+            if(params.length >= 2 && !params[0].equals("Dealt")) {
+                PokerAction action = parseAction(params);
+                if(action != null) actions.add(action);
+            }
+        }
+        return actions;
+    }
+
+    private static PokerAction parseAction(String[] params) {
+        PokerAction action;
+        switch (params[1]) {
+            case "checks":
+                action = new PokerAction(Type.Check);
+                action.setPlayer(params[0].replace(":", ""));
+                return action;
+            case "calls":
+                action = new PokerAction(Type.Call);
+                action.setPlayer(params[0].replace(":", ""));
+                return action;
+            case "bets":
+                action = new PokerAction(Type.Bet);
+                action.setPlayer(params[0].replace(":", ""));
+                return action;
+            case "raises":
+                action = new PokerAction(Type.Raise);
+                action.setPlayer(params[0].replace(":", ""));
+                return action;
+            case "folds":
+                action = new PokerAction(Type.Fold);
+                action.setPlayer(params[0].replace(":", ""));
+                return action;
+            case "leaves":
+                action = new PokerAction(Type.Leave);
+                action.setPlayer(params[0].replace(":", ""));
+                return action;
+            default:
+                return null;
+        }
     }
 
     /**
@@ -93,10 +133,9 @@ public class HandHistoryParser {
         Matcher matcher = pattern.matcher(hand);
         if(matcher.find()) {
             return matcher.group(1);
-        } else {
-            System.out.println("Error: Cannot find hand button location!");
-            return "";
-        }
+        } 
+        System.out.println("Error: Cannot find hand button location!");
+        return "";
     }
 
     /**
@@ -109,10 +148,9 @@ public class HandHistoryParser {
         Matcher matcher = pattern.matcher(hand);
         if(matcher.find()) {
             return Integer.parseInt(matcher.group(1));
-        } else {
-            System.out.println("Error: Cannot find hand button location!");
-            return -1;
         }
+        System.out.println("Error: Cannot find hand button location!");
+        return -1;
     }
 
     /**
