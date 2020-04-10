@@ -24,6 +24,7 @@ public class DBControls {
     
     /**
      * Adds a new player to table
+     * @param player player to be added
      */
     public static void insertPlayer(Player player) {
         
