@@ -17,6 +17,7 @@ public class HandHistoryParser {
      * @return list of pokerHand objects
      */
     public static List<PokerHand> parseFile(String filepath) {
+        List<PokerHand> hands = new ArrayList<PokerHand>();
         Scanner fi;
         fi = openHistoryFile();
         if (fi == null) return null;
@@ -28,7 +29,7 @@ public class HandHistoryParser {
                 singleHand = s.startsWith("PokerStars Hand")
                         ? s : singleHand + "\n" + s;
                 if(s.isBlank() && !singleHand.isBlank()) {
-                    parseHand(singleHand);
+                    hands.add(parseHand(singleHand));
                     singleHand = "";
                 }
             }
@@ -36,14 +37,14 @@ public class HandHistoryParser {
             fi.close();
         }
         
-        return null;
+        return hands;
     }
 
     /**
      *
      * @param hand
      */
-    private static void parseHand(String hand) {
+    private static PokerHand parseHand(String hand) {
         String handId = getHandId(hand);
         Map<Integer, String> players = getPlayers(hand);
         int button = getButton(hand);
@@ -63,6 +64,8 @@ public class HandHistoryParser {
         pokerHand.setTurn(turn);
         pokerHand.setRiver(river);
         System.out.println(pokerHand.toString());
+        
+        return pokerHand;
     }
 
     private static String getStringBetween(String text, String start, String end, String optEnd) {
