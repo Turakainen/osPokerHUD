@@ -30,7 +30,29 @@ public class DBControls {
      * Creates a new table for poker room
      */
     public static void createTable() {
+        Connection c = null;
+        Statement stmt = null;
         
+        try {
+           Class.forName("org.sqlite.JDBC");
+           c = DriverManager.getConnection("jdbc:sqlite:test.db");
+           System.out.println("Opened database successfully");
+
+           stmt = c.createStatement();
+           String sql = "CREATE TABLE pokerstars " +
+                          "( name          INT   PRIMARY KEY   NOT NULL," +
+                          " handsplayed    INT, " + 
+                          " preflopcalls   INT, " + 
+                          " preflopbets    INT,"  + 
+                          " preflopraises  INT)"; 
+           stmt.executeUpdate(sql);
+           stmt.close();
+           c.close();
+        } catch ( Exception e ) {
+           System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+           System.exit(0);
+        }
+        System.out.println("Table created successfully");
     }
     
     /**
@@ -55,5 +77,6 @@ public class DBControls {
      */
     public static void main(String[] args) {
         createDatabase();
+        createTable();
     }
 }
