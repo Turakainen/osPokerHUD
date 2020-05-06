@@ -19,9 +19,26 @@ public class Player {
     public double getPfr() {
         return (preflopBets + preflopRaises) / (double)handsPlayed * 100;
     }
-    
+
+    public String getName() {
+        return name;
+    }
+
     public int getHandsPlayed() {
         return handsPlayed;
+    }
+
+
+    public int getPreflopCalls() {
+        return preflopCalls;
+    }
+
+    public int getPreflopBets() {
+        return preflopBets;
+    }
+
+    public int getPreflopRaises() {
+        return preflopRaises;
     }
 }
 
