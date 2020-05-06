@@ -35,12 +35,12 @@ public class DBControls {
         
         try {
            Class.forName("org.sqlite.JDBC");
-           c = DriverManager.getConnection("jdbc:sqlite:test.db");
+           c = DriverManager.getConnection("jdbc:sqlite:osPokerHUD.db");
            System.out.println("Opened database successfully");
 
            stmt = c.createStatement();
            String sql = "CREATE TABLE pokerstars " +
-                          "( name          INT   PRIMARY KEY   NOT NULL," +
+                          "( name          TEXT   PRIMARY KEY   NOT NULL," +
                           " handsplayed    INT, " + 
                           " preflopcalls   INT, " + 
                           " preflopbets    INT,"  + 
@@ -57,10 +57,39 @@ public class DBControls {
     
     /**
      * Adds a new player to table
+     * @param table db table
      * @param player player to be added
      */
-    public static void insertPlayer(Player player) {
-        
+    public static void insertPlayer(String table, Player player) {
+        Connection c = null;
+        Statement stmt = null;
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:osPokerHUD.db");
+            c.setAutoCommit(false);
+            System.out.println("Opened database successfully");
+
+            stmt = c.createStatement();
+            String sql = "INSERT INTO pokerstars "
+                    + "(name, handsplayed, preflopcalls, preflopbets, preflopraises) "
+                    + "VALUES ("
+                    + player.getName()
+                    + player.getHandsPlayed()
+                    + player.getPreflopCalls()
+                    + player.getPreflopBets()
+                    + player.getPreflopRaises()
+                    +");";
+            stmt.executeUpdate(sql);
+
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Records created successfully");
     }
     
     /**
