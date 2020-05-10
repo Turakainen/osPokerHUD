@@ -77,24 +77,24 @@ public class DBControls {
             c = DriverManager.getConnection("jdbc:sqlite:osPokerHUD.db");
             c.setAutoCommit(false);
             System.out.println("Opened database successfully");
-
+            
+            PreparedStatement pstmt;
             String sql = "INSERT INTO pokerstars "
-                    + "(name, handsplayed, preflopcalls, preflopbets, preflopraises) "
-                    + "VALUES (?,?,?,?,?)";
-            PreparedStatement pstmt = c.prepareStatement(sql);
+                   + "(name, handsplayed, preflopcalls, preflopbets, preflopraises) "
+                   + "VALUES (?,?,?,?,?)";
+            pstmt = c.prepareStatement(sql);
             pstmt.setString(1, player.getName());
             pstmt.setInt(2, player.getHandsPlayed());
             pstmt.setInt(3, player.getPreflopCalls());
             pstmt.setInt(4, player.getPreflopBets());
             pstmt.setInt(5, player.getPreflopRaises());
             pstmt.executeUpdate();
-            
             pstmt.close();
+            
             c.commit();
             c.close();
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
         }
         System.out.println("Records created successfully");
     }
@@ -131,7 +131,7 @@ public class DBControls {
                System.out.println();
            }
            System.out.println("============================");
-           
+           c.close();
         } catch ( Exception e ) {
            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
            System.exit(0);
