@@ -2,6 +2,8 @@ package osHUD;
 
 import java.sql.*;
 
+import com.sun.jna.platform.win32.DBT;
+
 /**
  * Creates and controls data of database
  * @author Olli
@@ -106,6 +108,37 @@ public class DBControls {
     }
     
     /**
+     * Prints table contents to console
+     * @param table to print
+     */
+    public static void printTable(String table) {
+        Connection c = null;
+        
+        try {
+           Class.forName("org.sqlite.JDBC");
+           c = DriverManager.getConnection("jdbc:sqlite:osPokerHUD.db");
+           Statement st = c.createStatement();
+           ResultSet rs = st.executeQuery("SELECT * FROM " + table);
+           ResultSetMetaData rsmd = rs.getMetaData();
+           int columnCount = rsmd.getColumnCount();
+           
+           System.out.println("============================");
+           System.out.println("Table " + table + "contents:");
+           while(rs.next()) {
+               for(int i = 1; i <= columnCount; i++) {
+                   System.out.println(rs.getString(i) + " ");
+               }
+               System.out.println();
+           }
+           System.out.println("============================");
+           
+        } catch ( Exception e ) {
+           System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+           System.exit(0);
+        }
+    }
+    
+    /**
      * Test program
      * @param args not in use
      */
@@ -118,5 +151,6 @@ public class DBControls {
         insertPlayer(p1);
         insertPlayer(p2);
         insertPlayer(p3);
+        printTable("pokerstars");
     }
 }
