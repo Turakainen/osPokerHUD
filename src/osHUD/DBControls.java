@@ -37,30 +37,36 @@ public class DBControls {
            Class.forName("org.sqlite.JDBC");
            c = DriverManager.getConnection("jdbc:sqlite:osPokerHUD.db");
            System.out.println("Opened database successfully");
-
-           stmt = c.createStatement();
-           String sql = "CREATE TABLE pokerstars " +
-                          "( name          TEXT   PRIMARY KEY   NOT NULL," +
-                          " handsplayed    INT, " + 
-                          " preflopcalls   INT, " + 
-                          " preflopbets    INT,"  + 
-                          " preflopraises  INT)"; 
-           stmt.executeUpdate(sql);
-           stmt.close();
-           c.close();
+           
+           DatabaseMetaData dbm = c.getMetaData();
+           ResultSet tables = dbm.getTables(null, null, "pokerstars", null);
+           
+           if (!tables.next()) {
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE pokerstars "
+                    + "( name          TEXT   PRIMARY KEY   NOT NULL,"
+                    + " handsplayed    INT, " 
+                    + " preflopcalls   INT, "
+                    + " preflopbets    INT," 
+                    + " preflopraises  INT)";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+            System.out.println("Table created successfully");
+        } else {
+            System.out.println("ERROR: Table already exists!");
+        }
         } catch ( Exception e ) {
            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
            System.exit(0);
         }
-        System.out.println("Table created successfully");
     }
     
     /**
      * Adds a new player to table
-     * @param table db table
      * @param player player to be added
      */
-    public static void insertPlayer(String table, Player player) {
+    public static void insertPlayer(Player player) {
         Connection c = null;
         Statement stmt = null;
 
@@ -70,19 +76,18 @@ public class DBControls {
             c.setAutoCommit(false);
             System.out.println("Opened database successfully");
 
-            stmt = c.createStatement();
             String sql = "INSERT INTO pokerstars "
                     + "(name, handsplayed, preflopcalls, preflopbets, preflopraises) "
-                    + "VALUES ("
-                    + player.getName()
-                    + player.getHandsPlayed()
-                    + player.getPreflopCalls()
-                    + player.getPreflopBets()
-                    + player.getPreflopRaises()
-                    +");";
-            stmt.executeUpdate(sql);
-
-            stmt.close();
+                    + "VALUES (?,?,?,?,?)";
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            pstmt.setString(1, player.getName());
+            pstmt.setInt(2, player.getHandsPlayed());
+            pstmt.setInt(3, player.getPreflopCalls());
+            pstmt.setInt(4, player.getPreflopBets());
+            pstmt.setInt(5, player.getPreflopRaises());
+            pstmt.executeUpdate();
+            
+            pstmt.close();
             c.commit();
             c.close();
         } catch ( Exception e ) {
@@ -107,5 +112,11 @@ public class DBControls {
     public static void main(String[] args) {
         createDatabase();
         createTable();
+        Player p1 = new Player("Foo");
+        Player p2 = new Player("Bar");
+        Player p3 = new Player("Foobar");
+        insertPlayer(p1);
+        insertPlayer(p2);
+        insertPlayer(p3);
     }
 }
