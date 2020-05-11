@@ -2,8 +2,6 @@ package osHUD;
 
 import java.sql.*;
 
-import com.sun.jna.platform.win32.DBT;
-
 /**
  * Creates and controls data of database
  * @author Olli
