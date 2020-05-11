@@ -83,7 +83,7 @@ public class DBControls {
             PreparedStatement pstmt;
             String sql = "INSERT INTO " + table + " "
                    + "(name, handsplayed, preflopcalls, preflopbets, preflopraises) "
-                   + "VALUES (?,?,?,?,?)";
+                   + "VALUES (?,?,?,?,?);";
             pstmt = c.prepareStatement(sql);
             pstmt.setString(1, player.getName());
             pstmt.setInt(2, player.getHandsPlayed());
@@ -102,11 +102,40 @@ public class DBControls {
     }
     
     /**
-     * Looks for player with given name and adds current hands to data
-     * @param playerName name of the player
+     * Looks for player with given name and adds current stats to database table
+     * @param db database name
+     * @param table name
+     * @param player to update
      */
-    public static void appendPlayer(String playerName) {
+    public static void updatePlayer(String db, String table, Player player) {
+        Connection c = null;
         
+        try {
+            c = connectDatabase(db);
+            c.setAutoCommit(false);
+            
+            PreparedStatement pstmt;
+            String sql = "UPDATE " + table
+                    + " SET handsplayed=?"
+                    + ", preflopcalls=?"
+                    + ", preflopbets=?"
+                    + ", preflopraises=?"
+                    + " WHERE name=?;";
+            pstmt = c.prepareStatement(sql);
+            pstmt.setInt(1, player.getHandsPlayed());
+            pstmt.setInt(2, player.getPreflopCalls());
+            pstmt.setInt(3, player.getPreflopBets());
+            pstmt.setInt(4, player.getPreflopRaises());
+            pstmt.setString(5, player.getName());
+            pstmt.executeUpdate();
+            pstmt.close();
+            
+            c.commit();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
     }
     
     /**
@@ -152,9 +181,20 @@ public class DBControls {
         Player p3 = new Player("Foobar");
         
         createTable(db, table);
+        
         insertPlayer(db, table, p1);
         insertPlayer(db, table, p2);
         insertPlayer(db, table, p3);
+        
+        p1.setHandsPlayed(150);
+        p1.setPreflopBets(40);
+        p1.setPreflopRaises(15);
+        p2.setHandsPlayed(300);
+        p2.setPreflopBets(100);
+        
+        updatePlayer(db, table, p1);
+        updatePlayer(db, table, p2);
+        
         printTable(db, table);
     }
 }
