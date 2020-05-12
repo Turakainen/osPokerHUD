@@ -137,6 +137,45 @@ public class DBControls {
             System.exit(0);
         }
     }
+
+    /**
+     * Finds player with given name from database table
+     * @param db name of the database
+     * @param table name
+     * @param name player to find
+     * @return player object
+     */
+    public static Player findPlayer(String db, String table, String name) {
+        Connection c = null;
+        Player player = null;
+        
+        try {
+            c = connectDatabase(db);
+            
+            PreparedStatement pstmt;
+            String sql = "SELECT *"
+                    + " FROM " + table 
+                    + " WHERE name = ?;";
+            
+            pstmt = c.prepareStatement(sql);
+            pstmt.setString(1, name);
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                player = new Player(rs.getString("name"));
+                player.setHandsPlayed(rs.getInt("handsplayed"));
+                player.setPreflopCalls(rs.getInt("preflopcalls"));
+                player.setPreflopBets(rs.getInt("preflopbets"));
+                player.setPreflopRaises(rs.getInt("preflopraises"));
+            }
+            
+            pstmt.close();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        return player;
+    }
     
     /**
      * Prints table contents to console
@@ -196,5 +235,13 @@ public class DBControls {
         updatePlayer(db, table, p2);
         
         printTable(db, table);
+        
+        p3 = findPlayer(db, table, "Foo");
+        System.out.println("P3: " + p3.getName());
+        System.out.println(p3.getName());
+        System.out.println(p3.getHandsPlayed());
+        System.out.println(p3.getPreflopCalls());
+        System.out.println(p3.getPreflopBets());
+        System.out.println(p3.getPreflopRaises());
     }
 }
