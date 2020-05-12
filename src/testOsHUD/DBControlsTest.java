@@ -2,10 +2,19 @@ package testOsHUD;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.File;
+
+import org.junit.After;
 import org.junit.jupiter.api.Test;
+
+import osHUD.DBControls;
+import osHUD.Player;
 
 class DBControlsTest {
 
+    public final String testDB = "testDB";
+    public final String testTable = "testTable";
+    
     @Test
     void testConnectDatabase() {
         fail("Not yet implemented");
@@ -20,7 +29,18 @@ class DBControlsTest {
 
     @Test
     void testInsertPlayer() {
-        fail("Not yet implemented");
+        DBControls.createTable(testDB, testTable);
+        Player player1 = new Player("Tester 1");
+        Player player2 = new Player("Tester 2");
+        Player player3 = new Player("Tester 3");
+        
+        DBControls.insertPlayer(testDB, testTable, player1);
+        assertNotNull(DBControls.findPlayer(testDB, testTable, player1.getName()));
+        
+        DBControls.insertPlayer(testDB, testTable, player2);
+        DBControls.insertPlayer(testDB, testTable, player3);
+        assertNotNull(DBControls.findPlayer(testDB, testTable, player2.getName()));
+        assertNotNull(DBControls.findPlayer(testDB, testTable, player3.getName()));
     }
 
 
@@ -39,6 +59,12 @@ class DBControlsTest {
     @Test
     void testPrintTable() {
         fail("Not yet implemented");
+    }
+    
+    @After
+    void deleteTestDB() {
+        File db = new File(testDB+".db");
+        db.delete();
     }
 
 }
