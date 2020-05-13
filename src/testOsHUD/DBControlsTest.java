@@ -17,18 +17,6 @@ class DBControlsTest {
     public final String testTable = "testTable";
     
     @Test
-    void testConnectDatabase() {
-        fail("Not yet implemented");
-    }
-
-
-    @Test
-    void testCreateTable() {
-        fail("Not yet implemented");
-    }
-
-
-    @Test
     void testInsertPlayer() {
         DBControls.createTable(testDB, testTable);
         Player player1 = new Player("Tester 1");
@@ -47,21 +35,37 @@ class DBControlsTest {
 
     @Test
     void testUpdatePlayer() {
-        fail("Not yet implemented");
+        DBControls.createTable(testDB, testTable);
+        Player player1 = new Player("Tester 1");
+        DBControls.insertPlayer(testDB, testTable, player1);
+        
+        player1.setHandsPlayed(100);
+        DBControls.updatePlayer(testDB, testTable, player1);
+        player1 = DBControls.findPlayer(testDB, testTable, "Tester 1");
+        assertTrue(player1.getHandsPlayed() == 100);
+        
+        player1.setHandsPlayed(125);
+        DBControls.updatePlayer(testDB, testTable, player1);
+        player1 = DBControls.findPlayer(testDB, testTable, "Tester 1");
+        assertTrue(player1.getHandsPlayed() == 125);
     }
 
 
     @Test
     void testFindPlayer() {
-        fail("Not yet implemented");
+        DBControls.createTable(testDB, testTable);
+        Player player1 = new Player("Tester 1");
+        player1.setHandsPlayed(100);
+        player1.setPreflopCalls(40);
+        DBControls.insertPlayer(testDB, testTable, player1);
+        
+        player1 = new Player("");
+        player1 = DBControls.findPlayer(testDB, testTable, "Tester 1");
+        
+        assertTrue(player1.getHandsPlayed() == 100);
+        assertTrue(player1.getPreflopCalls() == 40);
     }
 
-
-    @Test
-    void testPrintTable() {
-        fail("Not yet implemented");
-    }
-    
     @AfterEach
     void onTearDown() {
         File db = new File(testDB+".db");
