@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 
 import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import osHUD.DBControls;
@@ -61,8 +62,8 @@ class DBControlsTest {
         fail("Not yet implemented");
     }
     
-    @After
-    void deleteTestDB() {
+    @AfterEach
+    void onTearDown() {
         File db = new File(testDB+".db");
         db.delete();
     }
